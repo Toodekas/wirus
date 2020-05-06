@@ -1,6 +1,9 @@
 /**
  * Canvas Wrapper Class
  */
+let canvas;
+let bolls;
+let loop;
 class Canvas {
   protected canvas: HTMLCanvasElement;
   addEventListener: any;
@@ -11,7 +14,6 @@ class Canvas {
     this.canvas.height = document.body.clientHeight;
 
     window.addEventListener("resize", this.resizeCanvas.bind(this), false);
-    var canvas = document.getElementById("created-canvas");
   }
 
   public getEl(): HTMLCanvasElement {
@@ -33,6 +35,13 @@ class Canvas {
   protected resizeCanvas(): void {
     this.canvas.width = document.body.clientWidth;
     this.canvas.height = document.body.clientHeight;
+  }
+
+  public clearCanvas(context, canvas) {
+    context.clearRect(0, 0, canvas.width, canvas.height);
+    var w = canvas.width;
+    canvas.width = 1;
+    canvas.width = w;
   }
 }
 
@@ -214,19 +223,26 @@ class Loop {
 
     requestAnimationFrame(this.start.bind(this));
   }
+  public update(ballsx: BallGenerator): void {
+    this.ballGenerator = ballsx;
+  }
 }
 
 class BallGenerator {
   protected canvas: Canvas;
   protected balls: Ball[] = [];
-  protected numberOfBalls: number;
 
   constructor(canvas: Canvas, numberOfBalls: number = 10) {
     this.canvas = canvas;
-    this.numberOfBalls = numberOfBalls;
   }
 
-  public generate(): BallGenerator {
+  public combine(pallid: BallGenerator) {
+    for (let pall of pallid.getAll()) {
+      this.add(pall);
+    }
+  }
+
+  public generate(numberOfBalls: number): BallGenerator {
     let size: number = this.getRandomSize();
 
     let ball = new Ball(
@@ -241,7 +257,7 @@ class BallGenerator {
       true
     );
     this.add(ball);
-    for (let i = 1; i < this.numberOfBalls; i++) {
+    for (let i = 1; i < numberOfBalls; i++) {
       let size: number = this.getRandomSize();
       /** init a new ball */
       let bool = false;
@@ -296,7 +312,7 @@ class BallGenerator {
     return this;
   }
 
-  protected add(ball: Ball): void {
+  public add(ball: Ball): void {
     this.balls.push(ball);
   }
 
@@ -314,7 +330,7 @@ class BallGenerator {
     return this.random(1, 4) || this.random(-4, -1);
   }
 
-  protected getRandomSize(): number {
+  public getRandomSize(): number {
     return this.random(30, 46);
   }
 
@@ -332,18 +348,20 @@ class BallGenerator {
 }
 
 function formSubmit() {
-  let canvas = new Canvas("created-canvas");
   var num = Number(
     (<HTMLInputElement>(<unknown>document.getElementById("lname"))).value
   );
 
-  let ballGenerator = new BallGenerator(canvas, num);
-  let loop = new Loop(canvas, ballGenerator.generate());
+  loop = new Loop(canvas, bolls.generate(num));
   loop.start();
 }
 
 function init(): void {
-  formSubmit();
+  canvas = new Canvas("created-canvas");
+  bolls = new BallGenerator(canvas);
+  // loop = new Loop(canvas, bolls.generate());
+
+  //formSubmit();
 }
 
 // class file to find out mouse cordinates

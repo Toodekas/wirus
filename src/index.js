@@ -1,6 +1,9 @@
 /**
  * Canvas Wrapper Class
  */
+var canvas;
+var bolls;
+var loop;
 var Canvas = /** @class */ (function () {
     function Canvas(id) {
         this.id = id;
@@ -8,7 +11,6 @@ var Canvas = /** @class */ (function () {
         this.canvas.width = document.body.clientWidth;
         this.canvas.height = document.body.clientHeight;
         window.addEventListener("resize", this.resizeCanvas.bind(this), false);
-        var canvas = document.getElementById("created-canvas");
     }
     Canvas.prototype.getEl = function () {
         return this.canvas;
@@ -25,6 +27,12 @@ var Canvas = /** @class */ (function () {
     Canvas.prototype.resizeCanvas = function () {
         this.canvas.width = document.body.clientWidth;
         this.canvas.height = document.body.clientHeight;
+    };
+    Canvas.prototype.clearCanvas = function (context, canvas) {
+        context.clearRect(0, 0, canvas.width, canvas.height);
+        var w = canvas.width;
+        canvas.width = 1;
+        canvas.width = w;
     };
     return Canvas;
 }());
@@ -163,6 +171,9 @@ var Loop = /** @class */ (function () {
         }
         requestAnimationFrame(this.start.bind(this));
     };
+    Loop.prototype.update = function (ballsx) {
+        this.ballGenerator = ballsx;
+    };
     return Loop;
 }());
 var BallGenerator = /** @class */ (function () {
@@ -170,15 +181,20 @@ var BallGenerator = /** @class */ (function () {
         if (numberOfBalls === void 0) { numberOfBalls = 10; }
         this.balls = [];
         this.canvas = canvas;
-        this.numberOfBalls = numberOfBalls;
     }
-    BallGenerator.prototype.generate = function () {
+    BallGenerator.prototype.combine = function (pallid) {
+        for (var _i = 0, _a = pallid.getAll(); _i < _a.length; _i++) {
+            var pall = _a[_i];
+            this.add(pall);
+        }
+    };
+    BallGenerator.prototype.generate = function (numberOfBalls) {
         var size = this.getRandomSize();
         var ball = new Ball(this.canvas, this.getRandomX(size), this.getRandomY(size), this.getRandomVelocity(), this.getRandomVelocity(), "hsl(116,100%,50%)", 
         //this.getRandomColor(), //instead of random color use green
         size, true);
         this.add(ball);
-        for (var i = 1; i < this.numberOfBalls; i++) {
+        for (var i = 1; i < numberOfBalls; i++) {
             var size_1 = this.getRandomSize();
             /** init a new ball */
             var bool = false;
@@ -234,14 +250,15 @@ var BallGenerator = /** @class */ (function () {
     return BallGenerator;
 }());
 function formSubmit() {
-    var canvas = new Canvas("created-canvas");
     var num = Number(document.getElementById("lname").value);
-    var ballGenerator = new BallGenerator(canvas, num);
-    var loop = new Loop(canvas, ballGenerator.generate());
+    loop = new Loop(canvas, bolls.generate(num));
     loop.start();
 }
 function init() {
-    formSubmit();
+    canvas = new Canvas("created-canvas");
+    bolls = new BallGenerator(canvas);
+    // loop = new Loop(canvas, bolls.generate());
+    //formSubmit();
 }
 // class file to find out mouse cordinates
 var Mouse = /** @class */ (function () {
