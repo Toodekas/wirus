@@ -4,6 +4,10 @@
 let canvas;
 let bolls;
 let loop;
+let mouse;
+let bool;
+let mousex;
+let mousey;
 class Canvas {
   protected canvas: HTMLCanvasElement;
   addEventListener: any;
@@ -14,6 +18,10 @@ class Canvas {
     this.canvas.height = document.body.clientHeight;
 
     window.addEventListener("resize", this.resizeCanvas.bind(this), false);
+    window.addEventListener("mousemove", function (event) {
+      mousex = event.clientX;
+      mousey = event.clientY;
+    });
   }
 
   public getEl(): HTMLCanvasElement {
@@ -128,33 +136,15 @@ class Ball implements Loopable {
     if (this.y - this.size <= 0) {
       this.velY = -this.velY;
     }
-    //collision with mouse
-    //TODO: fix mouse event
-    const mouse = new Mouse();
-    mouse.addListener("mouseenter", () => console.log(mouse.position));
-
-    mouse.addListener("mousemove", function () {
-      if (
-        Math.sqrt(
-          Math.pow(this.x - parseInt(mouse.position.split(",")[0]), 2) +
-            Math.pow(this.y - parseInt(mouse.position.split(",")[1]), 2)
-        ) <= 120
-      ) {
-        this.velX = -this.velX;
-        this.velY = -this.velY;
-      }
-    });
-    /*
+    //mouse collision
     if (
-      Math.sqrt(
-        Math.pow(this.x - mouselocation.split(",")[0], 2) +
-          Math.pow(this.y - mouselocation.split(",")[1], 2)
-      ) <= 120
+      Math.sqrt(Math.pow(this.x - mousex, 2) + Math.pow(this.y - mousey, 2)) <=
+      120
     ) {
       this.velX = -this.velX;
       this.velY = -this.velY;
     }
-    */
+
     //colision with other balls
     for (let ball of balls) {
       if (ball != this) {
@@ -199,7 +189,6 @@ class Ball implements Loopable {
 class Loop {
   protected canvas: Canvas;
   protected ballGenerator: BallGenerator;
-  protected mouseloc: number[];
 
   constructor(canvas: Canvas, ballGenerator: BallGenerator) {
     this.canvas = canvas;
@@ -216,7 +205,6 @@ class Loop {
       //reads in the balls to do stuff
       //we check if the current item we're looking at has it's location in the list
       //if it does, then that means that there's collision happening
-
       ball.draw();
       ball.update(this.ballGenerator.getAll());
     }
@@ -242,25 +230,11 @@ class BallGenerator {
     }
   }
 
-  public generate(numberOfBalls: number): BallGenerator {
-    let size: number = this.getRandomSize();
-
-    let ball = new Ball(
-      this.canvas,
-      this.getRandomX(size),
-      this.getRandomY(size),
-      this.getRandomVelocity(),
-      this.getRandomVelocity(),
-      "hsl(116,100%,50%)",
-      //this.getRandomColor(), //instead of random color use green
-      size,
-      true
-    );
-    this.add(ball);
-    for (let i = 1; i < numberOfBalls; i++) {
+  public generate(numberOfBalls: number, bool: boolean): BallGenerator {
+    //generates/adds all the balls to the ballgenerator
+    for (let i = 0; i < numberOfBalls; i++) {
       let size: number = this.getRandomSize();
       /** init a new ball */
-      let bool = false;
       let ball = new Ball(
         this.canvas,
         this.getRandomX(size),
@@ -268,11 +242,11 @@ class BallGenerator {
         this.getRandomVelocity(),
         this.getRandomVelocity(),
         "hsl(116,100%,50%)",
-        //this.getRandomColor(), //instead of random color use green
         size,
         bool
       );
 
+      //Fix for when two emojis spawn right on top of each other
       for (let bol of this.getAll()) {
         for (let bol2 of this.getAll()) {
           while (
@@ -297,7 +271,6 @@ class BallGenerator {
               this.getRandomVelocity(),
               this.getRandomVelocity(),
               "hsl(116,100%,50%)",
-              //this.getRandomColor(), //instead of random color use green
               size,
               false
             );
@@ -305,7 +278,6 @@ class BallGenerator {
         }
       }
 
-      //TODO: fix the ball random location issue because some balls keep bugging out
       this.add(ball);
     }
 
@@ -347,67 +319,21 @@ class BallGenerator {
   }
 }
 
+function formSubmit2() {
+  bool = true;
+  formSubmit();
+}
+
 function formSubmit() {
   var num = Number(
     (<HTMLInputElement>(<unknown>document.getElementById("lname"))).value
   );
-
-  loop = new Loop(canvas, bolls.generate(num));
+  loop = new Loop(canvas, bolls.generate(num, bool));
+  bool = false;
   loop.start();
 }
 
 function init(): void {
   canvas = new Canvas("created-canvas");
   bolls = new BallGenerator(canvas);
-  // loop = new Loop(canvas, bolls.generate());
-
-  //formSubmit();
-}
-
-// class file to find out mouse cordinates
-class Mouse {
-  x: number;
-  y: number;
-  callbacks: { mouseenter: any[]; mousemove: any[] };
-  constructor() {
-    this.x = 0;
-    this.y = 0;
-    this.callbacks = {
-      mouseenter: [],
-      mousemove: [],
-    };
-  }
-
-  get xPos() {
-    return this.x;
-  }
-
-  get yPos() {
-    return this.y;
-  }
-
-  get position() {
-    return `${this.x},${this.y}`;
-  }
-
-  addListener(type, callback) {
-    document.addEventListener(type, this); // Pass `this` as the second arg to keep the context correct
-    this.callbacks[type].push(callback);
-  }
-
-  // `handleEvent` is part of the browser's `EventListener` API.
-  // https://developer.mozilla.org/en-US/docs/Web/API/EventListener/handleEvent
-  handleEvent(event) {
-    const isMousemove = event.type === "mousemove";
-    const isMouseenter = event.type === "mouseenter";
-
-    if (isMousemove || isMouseenter) {
-      this.x = event.pageX;
-      this.y = event.pageY;
-    }
-
-    this.callbacks[event.type].forEach((callback) => {
-      callback();
-    });
-  }
 }

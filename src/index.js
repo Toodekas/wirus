@@ -1,46 +1,53 @@
 /**
  * Canvas Wrapper Class
  */
-var canvas;
-var bolls;
-var loop;
-var Canvas = /** @class */ (function () {
-    function Canvas(id) {
+let canvas;
+let bolls;
+let loop;
+let mouse;
+let bool;
+let mousex;
+let mousey;
+class Canvas {
+    constructor(id) {
         this.id = id;
         this.canvas = document.getElementById(id);
         this.canvas.width = document.body.clientWidth;
         this.canvas.height = document.body.clientHeight;
         window.addEventListener("resize", this.resizeCanvas.bind(this), false);
+        window.addEventListener("mousemove", function (event) {
+            mousex = event.clientX;
+            mousey = event.clientY;
+        });
     }
-    Canvas.prototype.getEl = function () {
+    getEl() {
         return this.canvas;
-    };
-    Canvas.prototype.getContext = function () {
+    }
+    getContext() {
         return this.canvas.getContext("2d");
-    };
-    Canvas.prototype.getWidth = function () {
+    }
+    getWidth() {
         return this.canvas.width;
-    };
-    Canvas.prototype.getHeight = function () {
+    }
+    getHeight() {
         return this.canvas.height;
-    };
-    Canvas.prototype.resizeCanvas = function () {
+    }
+    resizeCanvas() {
         this.canvas.width = document.body.clientWidth;
         this.canvas.height = document.body.clientHeight;
-    };
-    Canvas.prototype.clearCanvas = function (context, canvas) {
+    }
+    clearCanvas(context, canvas) {
         context.clearRect(0, 0, canvas.width, canvas.height);
         var w = canvas.width;
         canvas.width = 1;
         canvas.width = w;
-    };
-    return Canvas;
-}());
+    }
+}
 /**
  * Ball Wrapper Class
  */
-var Ball = /** @class */ (function () {
-    function Ball(canvas, x, y, velX, velY, color, size, sick) {
+class Ball {
+    constructor(canvas, x, y, velX, velY, color, size, sick) {
         this.canvas = canvas;
         this.x = x;
         this.y = y;
@@ -56,19 +63,19 @@ var Ball = /** @class */ (function () {
             this.img = "img/sicc.png";
         }
     }
-    Ball.prototype.draw = function () {
-        var context = this.canvas.getContext();
-        var sicc = new Image();
+    draw() {
+        let context = this.canvas.getContext();
+        let sicc = new Image();
         sicc.src = this.img;
         context.beginPath();
         context.arc(this.x, this.y, this.size, 0, 2 * Math.PI);
         context.drawImage(sicc, this.x - this.size, this.y - this.size, this.size * 2, this.size * 2);
         context.fill();
-    };
-    Ball.prototype.random = function (min, max) {
+    }
+    random(min, max) {
         return Math.floor(Math.random() * (max - min)) + min;
-    };
-    Ball.prototype.update = function (balls) {
+    }
+    update(balls) {
         //colision with wall
         if (this.x + this.size >= this.canvas.getWidth()) {
             this.velX = -this.velX;
@@ -82,31 +89,14 @@ var Ball = /** @class */ (function () {
         if (this.y - this.size <= 0) {
             this.velY = -this.velY;
         }
-        //collision with mouse
-        //TODO: fix mouse event
-        var mouse = new Mouse();
-        mouse.addListener("mouseenter", function () { return console.log(mouse.position); });
-        mouse.addListener("mousemove", function () {
-            if (Math.sqrt(Math.pow(this.x - parseInt(mouse.position.split(",")[0]), 2) +
-                Math.pow(this.y - parseInt(mouse.position.split(",")[1]), 2)) <= 120) {
-                this.velX = -this.velX;
-                this.velY = -this.velY;
-            }
-        });
-        /*
-        if (
-          Math.sqrt(
-            Math.pow(this.x - mouselocation.split(",")[0], 2) +
-              Math.pow(this.y - mouselocation.split(",")[1], 2)
-          ) <= 120
-        ) {
-          this.velX = -this.velX;
-          this.velY = -this.velY;
+        //mouse collision
+        if (Math.sqrt(Math.pow(this.x - mousex, 2) + Math.pow(this.y - mousey, 2)) <=
+            120) {
+            this.velX = -this.velX;
+            this.velY = -this.velY;
         }
-        */
         //colision with other balls
-        for (var _i = 0, balls_1 = balls; _i < balls_1.length; _i++) {
-            var ball = balls_1[_i];
+        for (let ball of balls) {
             if (ball != this) {
                 var arv = this.random(30, 70);
                 if (Math.sqrt(Math.pow(this.x - ball.x, 2) + Math.pow(this.y - ball.y, 2)) <=
@@ -123,46 +113,32 @@ var Ball = /** @class */ (function () {
         }
         this.x += this.velX;
         this.y += this.velY;
-    };
-    Object.defineProperty(Ball.prototype, "getX", {
-        get: function () {
-            return this.x;
-        },
-        enumerable: true,
-        configurable: true
-    });
-    Object.defineProperty(Ball.prototype, "getY", {
-        get: function () {
-            return this.y;
-        },
-        enumerable: true,
-        configurable: true
-    });
-    Object.defineProperty(Ball.prototype, "getSize", {
-        get: function () {
-            return this.size;
-        },
-        enumerable: true,
-        configurable: true
-    });
-    return Ball;
-}());
+    }
+    get getX() {
+        return this.x;
+    }
+    get getY() {
+        return this.y;
+    }
+    get getSize() {
+        return this.size;
+    }
+}
 /**
  * Main Loop Class
  */
-var Loop = /** @class */ (function () {
-    function Loop(canvas, ballGenerator) {
+class Loop {
+    constructor(canvas, ballGenerator) {
         this.canvas = canvas;
         this.ballGenerator = ballGenerator;
         this.canvas.addEventListener;
     }
-    Loop.prototype.start = function () {
+    start() {
         this.canvas.getContext().fillStyle = "rgba(255,255,255,0.15)";
         this.canvas
             .getContext()
             .fillRect(0, 0, this.canvas.getWidth(), this.canvas.getHeight());
-        for (var _i = 0, _a = this.ballGenerator.getAll(); _i < _a.length; _i++) {
-            var ball = _a[_i];
+        for (let ball of this.ballGenerator.getAll()) {
             //reads in the balls to do stuff
             //we check if the current item we're looking at has it's location in the list
             //if it does, then that means that there's collision happening
@@ -170,144 +146,82 @@ var Loop = /** @class */ (function () {
             ball.update(this.ballGenerator.getAll());
         }
         requestAnimationFrame(this.start.bind(this));
-    };
-    Loop.prototype.update = function (ballsx) {
+    }
+    update(ballsx) {
         this.ballGenerator = ballsx;
-    };
-    return Loop;
-}());
-var BallGenerator = /** @class */ (function () {
-    function BallGenerator(canvas, numberOfBalls) {
-        if (numberOfBalls === void 0) { numberOfBalls = 10; }
+    }
+}
+class BallGenerator {
+    constructor(canvas, numberOfBalls = 10) {
         this.balls = [];
         this.canvas = canvas;
     }
-    BallGenerator.prototype.combine = function (pallid) {
-        for (var _i = 0, _a = pallid.getAll(); _i < _a.length; _i++) {
-            var pall = _a[_i];
+    combine(pallid) {
+        for (let pall of pallid.getAll()) {
             this.add(pall);
         }
-    };
-    BallGenerator.prototype.generate = function (numberOfBalls) {
-        var size = this.getRandomSize();
-        var ball = new Ball(this.canvas, this.getRandomX(size), this.getRandomY(size), this.getRandomVelocity(), this.getRandomVelocity(), "hsl(116,100%,50%)", 
-        //this.getRandomColor(), //instead of random color use green
-        size, true);
-        this.add(ball);
-        for (var i = 1; i < numberOfBalls; i++) {
-            var size_1 = this.getRandomSize();
+    }
+    generate(numberOfBalls, bool) {
+        //generates/adds all the balls to the ballgenerator
+        for (let i = 0; i < numberOfBalls; i++) {
+            let size = this.getRandomSize();
             /** init a new ball */
-            var bool = false;
-            var ball_1 = new Ball(this.canvas, this.getRandomX(size_1), this.getRandomY(size_1), this.getRandomVelocity(), this.getRandomVelocity(), "hsl(116,100%,50%)", 
-            //this.getRandomColor(), //instead of random color use green
-            size_1, bool);
-            for (var _i = 0, _a = this.getAll(); _i < _a.length; _i++) {
-                var bol = _a[_i];
-                for (var _b = 0, _c = this.getAll(); _b < _c.length; _b++) {
-                    var bol2 = _c[_b];
+            let ball = new Ball(this.canvas, this.getRandomX(size), this.getRandomY(size), this.getRandomVelocity(), this.getRandomVelocity(), "hsl(116,100%,50%)", size, bool);
+            //Fix for when two emojis spawn right on top of each other
+            for (let bol of this.getAll()) {
+                for (let bol2 of this.getAll()) {
                     while (Math.abs(bol.getX - bol2.getX) <=
                         bol.getSize + bol2.getSize + 30) {
-                        bol = new Ball(this.canvas, this.getRandomX(size_1), this.getRandomY(size_1), this.getRandomVelocity(), this.getRandomVelocity(), "hsl(116,100%,50%)", 
+                        bol = new Ball(this.canvas, this.getRandomX(size), this.getRandomY(size), this.getRandomVelocity(), this.getRandomVelocity(), "hsl(116,100%,50%)", 
                         //this.getRandomColor(), //instead of random color use green
-                        size_1, false);
-                        bol2 = new Ball(this.canvas, this.getRandomX(size_1), this.getRandomY(size_1), this.getRandomVelocity(), this.getRandomVelocity(), "hsl(116,100%,50%)", 
-                        //this.getRandomColor(), //instead of random color use green
-                        size_1, false);
+                        size, false);
+                        bol2 = new Ball(this.canvas, this.getRandomX(size), this.getRandomY(size), this.getRandomVelocity(), this.getRandomVelocity(), "hsl(116,100%,50%)", size, false);
                     }
                 }
             }
-            //TODO: fix the ball random location issue because some balls keep bugging out
-            this.add(ball_1);
+            this.add(ball);
         }
         return this;
-    };
-    BallGenerator.prototype.add = function (ball) {
+    }
+    add(ball) {
         this.balls.push(ball);
-    };
-    BallGenerator.prototype.getAll = function () {
+    }
+    getAll() {
         return this.balls;
-    };
-    BallGenerator.prototype.getRandomColor = function () {
-        var hue = Math.floor(Math.random() * 360);
-        var pastel = "hsl(" + hue + ", 100%, 87.5%)";
+    }
+    getRandomColor() {
+        let hue = Math.floor(Math.random() * 360);
+        let pastel = "hsl(" + hue + ", 100%, 87.5%)";
         return pastel;
-    };
-    BallGenerator.prototype.getRandomVelocity = function () {
+    }
+    getRandomVelocity() {
         return this.random(1, 4) || this.random(-4, -1);
-    };
-    BallGenerator.prototype.getRandomSize = function () {
+    }
+    getRandomSize() {
         return this.random(30, 46);
-    };
-    BallGenerator.prototype.getRandomX = function (size) {
+    }
+    getRandomX(size) {
         return this.random(size, this.canvas.getWidth() - size * 2);
-    };
-    BallGenerator.prototype.getRandomY = function (size) {
+    }
+    getRandomY(size) {
         return this.random(size, this.canvas.getHeight() - size * 2);
-    };
-    BallGenerator.prototype.random = function (min, max) {
+    }
+    random(min, max) {
         return Math.floor(Math.random() * (max - min)) + min;
-    };
-    return BallGenerator;
-}());
+    }
+}
+function formSubmit2() {
+    bool = true;
+    formSubmit();
+}
 function formSubmit() {
     var num = Number(document.getElementById("lname").value);
-    loop = new Loop(canvas, bolls.generate(num));
+    loop = new Loop(canvas, bolls.generate(num, bool));
+    bool = false;
     loop.start();
 }
 function init() {
     canvas = new Canvas("created-canvas");
     bolls = new BallGenerator(canvas);
-    // loop = new Loop(canvas, bolls.generate());
-    //formSubmit();
 }
-// class file to find out mouse cordinates
-var Mouse = /** @class */ (function () {
-    function Mouse() {
-        this.x = 0;
-        this.y = 0;
-        this.callbacks = {
-            mouseenter: [],
-            mousemove: [],
-        };
-    }
-    Object.defineProperty(Mouse.prototype, "xPos", {
-        get: function () {
-            return this.x;
-        },
-        enumerable: true,
-        configurable: true
-    });
-    Object.defineProperty(Mouse.prototype, "yPos", {
-        get: function () {
-            return this.y;
-        },
-        enumerable: true,
-        configurable: true
-    });
-    Object.defineProperty(Mouse.prototype, "position", {
-        get: function () {
-            return this.x + "," + this.y;
-        },
-        enumerable: true,
-        configurable: true
-    });
-    Mouse.prototype.addListener = function (type, callback) {
-        document.addEventListener(type, this); // Pass `this` as the second arg to keep the context correct
-        this.callbacks[type].push(callback);
-    };
-    // `handleEvent` is part of the browser's `EventListener` API.
-    // https://developer.mozilla.org/en-US/docs/Web/API/EventListener/handleEvent
-    Mouse.prototype.handleEvent = function (event) {
-        var isMousemove = event.type === "mousemove";
-        var isMouseenter = event.type === "mouseenter";
-        if (isMousemove || isMouseenter) {
-            this.x = event.pageX;
-            this.y = event.pageY;
-        }
-        this.callbacks[event.type].forEach(function (callback) {
-            callback();
-        });
-    };
-    return Mouse;
-}());
 //# sourceMappingURL=index.js.map

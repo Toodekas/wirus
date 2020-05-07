@@ -1,20 +1,20 @@
 {
-  "name": "wirus",
-  "version": "1.0.0",
+  "name": "gotoandplay_kodutoo",
+  "version": "1.1.2",
   "description": "",
-  "main": "build/index.js",
+  "main": "src/index.js",
   "scripts": {
     "start:dev": "nodemon",
-    "build": "rimraf ./build && tsc",
-    "start": "npm run build && node build/index.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
-    
+    "build": "tsc -p ./src",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "open": "start http://localhost:1234"
   },
   "keywords": [],
-  "author": "",
+  "author": "Martin Toode",
   "license": "ISC",
   "devDependencies": {
     "@types/node": "^13.13.4",
+    "http-server": "^0.12.3",
     "nodemon": "^2.0.3",
     "ts-node": "^8.9.1",
     "typescript": "^3.8.3"
@@ -27,5 +27,8 @@
     "ext": ".ts,.js",
     "ignore": [],
     "exec": "ts-node ./src/index.ts"
+  },
+  "dependencies": {
+    "open": "^7.0.3"
   }
 }
